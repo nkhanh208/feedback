@@ -12,9 +12,9 @@
                 extend: {
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
-                        dark: '#0B1120',
-                        neonBlue: '#00f3ff',
-                        neonPurple: '#bc13fe'
+                        primary: '#2563eb', // Xanh dương đậm hơn cho nền sáng
+                        secondary: '#9333ea', // Tím
+                        accent: '#f59e0b', // Vàng
                     }
                 }
             }
@@ -22,135 +22,171 @@
     </script>
     <style>
         body {
-            /* Nền trong suốt để hòa hợp với Google Sites */
-            background-color: transparent;
-            color: white;
-            overflow: hidden; 
+            /* NỀN TRẮNG SÁNG */
+            background-color: #f8fafc; /* Slate-50: Trắng hơi xám nhẹ cho dịu mắt */
+            color: #1e293b; /* Slate-800: Chữ màu đen xám */
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         
+        /* Hiệu ứng kính sáng (Light Glass) */
         .glass {
-            background: rgba(15, 23, 42, 0.85); 
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ */
         }
 
         .star {
             cursor: pointer; transition: transform 0.2s, color 0.2s;
-            font-size: 2.5rem; color: #475569; 
+            font-size: 2.5rem; color: #cbd5e1; /* Màu xám nhạt khi chưa chọn */
         }
-        .star.active { color: #FACC15; text-shadow: 0 0 15px #FACC15; }
+        .star.active { 
+            color: #f59e0b; /* Màu vàng cam */
+            filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.5)); 
+        }
         .star:hover { transform: scale(1.2); }
         
-        /* Hiệu ứng Marquee (Chữ chạy) */
+        /* Hiệu ứng trôi tin nhắn (Marquee) */
         .marquee-container {
+            /* Mask mờ dần ở trên và dưới cho nền trắng */
             mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
         }
         .marquee-content {
-            animation: scrollUp 30s linear infinite; /* Chậm lại xíu cho dễ đọc */
+            animation: scrollUp 30s linear infinite; 
         }
-        .marquee-content:hover { animation-play-state: paused; }
+        @media (min-width: 768px) {
+            .marquee-content:hover { animation-play-state: paused; }
+        }
         
         @keyframes scrollUp {
             0% { transform: translateY(0); }
             100% { transform: translateY(-50%); }
         }
 
+        /* Input nền sáng */
         .tech-input {
-            background: rgba(0, 0, 0, 0.4); border: 1px solid #334155; transition: all 0.3s;
+            background: #ffffff;
+            border: 1px solid #cbd5e1; /* Border xám nhạt */
+            transition: all 0.3s;
+            color: #334155;
         }
         .tech-input:focus {
-            border-color: #00f3ff; background: rgba(0, 0, 0, 0.7); box-shadow: 0 0 10px rgba(0, 243, 255, 0.2); outline: none;
+            border-color: #2563eb; /* Xanh dương */
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Glow nhẹ */
+            outline: none;
         }
+        .tech-input::placeholder { color: #94a3b8; }
         
-        /* Ẩn hiện các phần */
         .hidden-mode { display: none !important; }
         .full-width { grid-column: span 2 !important; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex items-center justify-center min-h-screen p-4 bg-slate-50">
 
     <!-- Grid Container -->
-    <div id="mainContainer" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 h-[600px]">
+    <div id="mainContainer" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 h-auto md:h-[600px] mb-10">
         
-        <!-- CỘT TRÁI: FORM ĐÁNH GIÁ (Có ID để ẩn đi) -->
-        <div id="leftColumn" class="glass p-8 rounded-2xl flex flex-col justify-center relative overflow-hidden transition-all duration-500">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neonBlue to-neonPurple"></div>
+        <!-- CỘT TRÁI: FORM ĐÁNH GIÁ -->
+        <div id="leftColumn" class="glass p-6 md:p-8 rounded-3xl flex flex-col justify-center relative overflow-hidden transition-all duration-500 order-1 bg-white">
+            <!-- Dải màu trang trí phía trên -->
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
             
             <div class="mb-6">
-                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neonBlue to-neonPurple">GỬI TÍN HIỆU 📡</h2>
-                <p class="text-slate-300 text-sm mt-1">Chia sẻ cảm nhận của bạn về thư viện nhé!</p>
+                <h2 class="text-3xl font-bold text-slate-800">GỬI GÓP Ý 📬</h2>
+                <p class="text-slate-500 text-sm mt-1">Ý kiến của bạn giúp thư viện hoàn thiện hơn!</p>
             </div>
             
-            <!-- Thông báo từ Email -->
-            <div id="emailAlert" class="hidden mb-4 bg-green-500/20 border border-green-500/50 p-3 rounded-lg flex items-center gap-2">
-                <span class="text-xl">📧</span>
-                <div class="text-xs text-green-200">
-                    Chào <b><span id="alertName">Bạn</span></b>, hệ thống đã ghi nhận <b><span id="alertStar">5</span> sao</b>. Hãy viết thêm vài dòng nhé!
+            <div id="emailAlert" class="hidden mb-4 bg-green-50 border border-green-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">📧</div>
+                <div class="text-sm text-green-700">
+                    Chào <b><span id="alertName">Bạn</span></b>, đã nhận <b><span id="alertStar">5</span> sao</b> từ email. Viết thêm vài dòng nhé!
                 </div>
             </div>
 
             <form id="feedbackForm" class="space-y-5 relative z-10">
                 <div>
-                    <label class="block text-xs text-neonBlue font-bold mb-1 uppercase tracking-wider">Danh tính</label>
-                    <input type="text" name="Tên" id="inpName" placeholder="VD: Mèo Béo 12A3" required class="tech-input w-full rounded-lg p-3 text-white placeholder-slate-500">
+                    <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">Danh tính</label>
+                    <input type="text" name="Tên" id="inpName" placeholder="VD: Mèo Béo 12A3" required class="tech-input w-full rounded-xl p-3">
                 </div>
                 <div>
-                    <label class="block text-xs text-neonBlue font-bold mb-1 uppercase tracking-wider text-center">Mức độ hài lòng</label>
+                    <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider text-center">Mức độ hài lòng</label>
                     <div class="flex justify-center gap-2 py-1" id="starContainer">
-                        <span class="star" data-value="1">★</span>
-                        <span class="star" data-value="2">★</span>
-                        <span class="star" data-value="3">★</span>
-                        <span class="star" data-value="4">★</span>
-                        <span class="star" data-value="5">★</span>
+                        <span class="star text-3xl md:text-4xl" data-value="1">★</span>
+                        <span class="star text-3xl md:text-4xl" data-value="2">★</span>
+                        <span class="star text-3xl md:text-4xl" data-value="3">★</span>
+                        <span class="star text-3xl md:text-4xl" data-value="4">★</span>
+                        <span class="star text-3xl md:text-4xl" data-value="5">★</span>
                     </div>
                     <input type="hidden" name="Số sao" id="ratingInput" value="5">
                 </div>
                 <div>
-                    <label class="block text-xs text-neonBlue font-bold mb-1 uppercase tracking-wider">Thông điệp</label>
-                    <textarea name="Lời nhắn" id="inpMsg" rows="3" placeholder="Sách hay lắm, nhưng cần thêm điều hòa..." required class="tech-input w-full rounded-lg p-3 text-white placeholder-slate-500"></textarea>
+                    <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">Thông điệp</label>
+                    <textarea name="Lời nhắn" id="inpMsg" rows="3" placeholder="Sách hay lắm, nhưng cần thêm điều hòa..." required class="tech-input w-full rounded-xl p-3"></textarea>
                 </div>
-                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold py-3 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.4)] transform active:scale-95 transition-all">
-                    🚀 GỬI VỀ TRÁI ĐẤT
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transform active:scale-95 transition-all">
+                    🚀 GỬI PHẢN HỒI
                 </button>
             </form>
             
-            <div id="successMsg" class="hidden absolute inset-0 bg-[#0B1120]/95 flex-col items-center justify-center text-center z-20 rounded-2xl">
-                <div class="text-6xl mb-4 animate-bounce">🎉</div>
-                <h3 class="text-2xl font-bold text-green-400">ĐÃ GỬI THÀNH CÔNG!</h3>
-                <p class="text-slate-300 text-sm mt-2 mb-6">Cảm ơn bạn đã đóng góp ý kiến.</p>
-                <button onclick="location.reload()" class="px-6 py-2 border border-slate-500 rounded-full hover:bg-slate-700 hover:text-white transition text-sm text-slate-300">Gửi phản hồi khác</button>
+            <div id="successMsg" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm flex-col items-center justify-center text-center z-20 rounded-3xl p-6">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-bounce">
+                    <span class="text-4xl">🎉</span>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800">ĐÃ GỬI THÀNH CÔNG!</h3>
+                <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Cảm ơn bạn đã đóng góp ý kiến xây dựng thư viện.</p>
+                <button onclick="location.reload()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
             </div>
         </div>
 
-        <!-- CỘT PHẢI: WALL OF LOVE (Luôn hiện) -->
-        <div id="rightColumn" class="glass p-6 rounded-2xl flex flex-col h-full overflow-hidden transition-all duration-500">
-            <h3 class="text-xl font-bold mb-6 flex items-center gap-3 border-b border-white/10 pb-4">
-                <span class="w-2 h-8 bg-yellow-400 rounded-full shadow-[0_0_10px_orange]"></span>
+        <!-- CỘT PHẢI: WALL OF LOVE -->
+        <div id="rightColumn" class="glass p-6 rounded-3xl flex flex-col h-[400px] md:h-full overflow-hidden transition-all duration-500 order-2 bg-white">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3 border-b border-slate-100 pb-4 text-slate-800">
+                <span class="w-1.5 h-8 bg-yellow-400 rounded-full"></span>
                 GÓC KHEN NGỢI 💖
             </h3>
             
             <div class="flex-1 overflow-hidden marquee-container relative">
                 <div class="marquee-content space-y-4" id="reviewList">
-                    <!-- DATA SẼ ĐƯỢC LOAD VÀO ĐÂY (Ở phiên bản demo này mình để tĩnh) -->
-                    <!-- Nếu bạn muốn load từ Google Sheets, cần dùng code fetch CSV như Dashboard -->
                     
-                    <div class="bg-slate-900/60 p-4 rounded-xl border-l-2 border-yellow-400 hover:bg-slate-800/80 transition backdrop-blur-sm">
-                        <div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-300">Minh Anh 11A2</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div>
-                        <p class="text-slate-300 text-sm leading-relaxed">"Thư viện có nhiều sách hay quá, thích nhất cuốn Nhà Giả Kim!"</p>
+                    <!-- REVIEW MẪU (STYLE SÁNG) -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-blue-600">Minh Anh 11A2</span>
+                            <div class="flex text-yellow-400 text-xs">★★★★★</div>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">"Thư viện có nhiều sách hay quá, thích nhất cuốn Nhà Giả Kim! Không gian cũng rất chill."</p>
                     </div>
-                    <div class="bg-slate-900/60 p-4 rounded-xl border-l-2 border-purple-400 hover:bg-slate-800/80 transition backdrop-blur-sm">
-                        <div class="flex justify-between items-center mb-2"><span class="font-bold text-purple-300">Tuấn Hưng</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div>
-                        <p class="text-slate-300 text-sm leading-relaxed">"Web thư viện xịn xò thực sự. Chức năng Chatbot đỉnh của chóp! 10 điểm."</p>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-purple-600">Tuấn Hưng</span>
+                            <div class="flex text-yellow-400 text-xs">★★★★★</div>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">"Web thư viện xịn xò thực sự. Chức năng Chatbot đỉnh của chóp! 10 điểm."</p>
                     </div>
-                    <div class="bg-slate-900/60 p-4 rounded-xl border-l-2 border-green-400 hover:bg-slate-800/80 transition backdrop-blur-sm">
-                        <div class="flex justify-between items-center mb-2"><span class="font-bold text-green-300">Ngọc Huyền</span><div class="flex text-yellow-400 text-xs">★★★★☆</div></div>
-                        <p class="text-slate-300 text-sm leading-relaxed">"Hy vọng thư viện nhập thêm trọn bộ Conan ạ ^^ Đợi mãi chưa thấy."</p>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-green-600">Ngọc Huyền</span>
+                            <div class="flex text-yellow-400 text-xs">★★★★☆</div>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">"Hy vọng thư viện nhập thêm trọn bộ Conan ạ ^^ Đợi mãi chưa thấy."</p>
                     </div>
-                    <!-- Lặp lại -->
-                    <div class="bg-slate-900/60 p-4 rounded-xl border-l-2 border-yellow-400 backdrop-blur-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-300">Minh Anh 11A2</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div><p class="text-slate-300 text-sm">"Thư viện có nhiều sách hay quá, thích nhất cuốn Nhà Giả Kim!"</p></div>
-                    <div class="bg-slate-900/60 p-4 rounded-xl border-l-2 border-purple-400 backdrop-blur-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-purple-300">Tuấn Hưng</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div><p class="text-slate-300 text-sm">"Web thư viện xịn xò thực sự. Chức năng Chatbot đỉnh!"</p></div>
+                    
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-pink-600">Ẩn danh</span>
+                            <div class="flex text-yellow-400 text-xs">★★★★★</div>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed">"Cô thủ thư dễ tính lắm luôn. Mọi người nhớ trả sách đúng hạn nhé."</p>
+                    </div>
+
+                     <!-- COPY LẠI ĐỂ LOOP CHO MƯỢT -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-600">Minh Anh 11A2</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div><p class="text-slate-600 text-sm">"Thư viện có nhiều sách hay quá, thích nhất cuốn Nhà Giả Kim!"</p></div>
+                     <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-purple-600">Tuấn Hưng</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div><p class="text-slate-600 text-sm">"Web thư viện xịn xò thực sự. Chức năng Chatbot đỉnh!"</p></div>
+
                 </div>
             </div>
         </div>
@@ -158,26 +194,20 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // Dán Link Web App (Script Google) của bạn vào đây:
+        // 👇 DÁN LINK WEB APP (/exec) CỦA BẠN VÀO ĐÂY 👇
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbcx9OLm4B1wbNf9eeVaANPjW027JBDz861SnlO7vu_eiBP_EEWBMZB7QDt4wrzapBi55A/exec';
 
-        // --- LOGIC XỬ LÝ CHẾ ĐỘ HIỂN THỊ ---
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // 1. Kiểm tra chế độ xem (View Only) cho Google Sites
             const viewMode = urlParams.get('view');
             if (viewMode === 'only') {
-                // Ẩn cột trái (Form)
                 document.getElementById('leftColumn').classList.add('hidden-mode');
-                // Mở rộng cột phải (List) ra toàn màn hình
                 document.getElementById('rightColumn').classList.add('full-width');
-                // Sửa lại Grid của container để nó chỉ còn 1 cột
                 document.getElementById('mainContainer').classList.remove('md:grid-cols-2');
                 document.getElementById('mainContainer').classList.add('grid-cols-1');
             }
 
-            // 2. Kiểm tra thông tin từ Email (Auto-fill)
             const paramName = urlParams.get('name');
             const paramStar = urlParams.get('star');
 
@@ -191,7 +221,6 @@
                 document.getElementById('alertStar').innerText = paramStar;
                 if (paramName) {
                     document.getElementById('emailAlert').classList.remove('hidden');
-                    // Nếu không phải chế độ xem, focus vào ô nhập
                     if (viewMode !== 'only') {
                         setTimeout(() => document.getElementById('inpMsg').focus(), 500);
                     }
@@ -199,7 +228,6 @@
             }
         };
 
-        // Các hàm xử lý sao và gửi form (giữ nguyên)
         const stars = document.querySelectorAll('.star');
         const ratingInput = document.getElementById('ratingInput');
         
@@ -223,21 +251,22 @@
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
+            
             btn.innerHTML = '⏳ Đang gửi...';
             btn.disabled = true;
-            btn.classList.add('opacity-50');
+            btn.classList.add('opacity-70');
 
             fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form)})
                 .then(response => {
                     document.getElementById('successMsg').classList.remove('hidden');
                     document.getElementById('successMsg').classList.add('flex');
                     
-                    // Thêm review ảo vào cột bên phải
                     const name = form.querySelector('input[name="Tên"]').value;
                     const msg = form.querySelector('textarea[name="Lời nhắn"]').value;
                     const star = ratingInput.value;
                     let starsStr = ""; for(let i=0; i<star; i++) starsStr += "★";
-                    const html = `<div class="bg-slate-900/60 p-4 rounded-xl border-l-2 border-neonBlue animate-[pulse_1s] ring-2 ring-neonBlue/50 backdrop-blur-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-neonBlue">${name}</span><div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div></div><p class="text-white text-sm leading-relaxed">${msg}</p><p class="text-[10px] text-gray-500 mt-2 italic">Vừa xong</p></div>`;
+                    // HTML cho review mới (Style sáng)
+                    const html = `<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md ring-2 ring-blue-100 animate-[pulse_1s]"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-600">${name}</span><div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div></div><p class="text-slate-700 text-sm leading-relaxed">${msg}</p><p class="text-[10px] text-slate-400 mt-2 italic">Vừa xong</p></div>`;
                     document.getElementById('reviewList').insertAdjacentHTML('afterbegin', html);
                 })
                 .catch(error => {
@@ -247,7 +276,7 @@
                 .finally(() => {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
-                    btn.classList.remove('opacity-50');
+                    btn.classList.remove('opacity-70');
                 });
         });
     </script>
