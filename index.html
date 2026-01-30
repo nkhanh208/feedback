@@ -45,6 +45,7 @@
         }
         .star:hover { transform: scale(1.2); }
         
+        /* Marquee Animation */
         .marquee-container {
             mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
@@ -75,7 +76,6 @@
         .hidden-mode { display: none !important; }
         .full-width { grid-column: span 2 !important; }
         
-        /* Nút xóa cho Admin */
         .btn-delete {
             opacity: 0;
             transition: opacity 0.2s;
@@ -89,7 +89,7 @@
 
     <div id="mainContainer" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 h-auto md:h-[600px] mb-10">
         
-        <!-- CỘT TRÁI: FORM -->
+        <!-- CỘT TRÁI: FORM (GỬI DỮ LIỆU) -->
         <div id="leftColumn" class="glass p-6 md:p-8 rounded-3xl flex flex-col justify-center relative overflow-hidden transition-all duration-500 order-1 bg-white">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
             
@@ -138,7 +138,7 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: TƯỜNG REVIEW -->
+        <!-- CỘT PHẢI: TƯỜNG REVIEW (LẤY TỪ GOOGLE SHEETS) -->
         <div id="rightColumn" class="glass p-6 rounded-3xl flex flex-col h-[400px] md:h-full overflow-hidden transition-all duration-500 order-2 bg-white">
             <h3 class="text-xl font-bold mb-6 flex items-center gap-3 border-b border-slate-100 pb-4 text-slate-800">
                 <span class="w-1.5 h-8 bg-yellow-400 rounded-full"></span>
@@ -147,6 +147,7 @@
             
             <div class="flex-1 overflow-hidden marquee-container relative">
                 <div class="marquee-content space-y-4" id="reviewList">
+                    <!-- Dữ liệu thật sẽ được chèn vào đây -->
                     <div class="text-center text-slate-400 py-10 loading-pulse">Đang tải review...</div>
                 </div>
             </div>
@@ -155,7 +156,8 @@
 
     <script>
         // --- CẤU HÌNH ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbcx9OLm4B1wbNf9eeVaANPjW027JBDz861SnlO7vu_eiBP_EEWBMZB7QDt4wrzapBi55A/exec';
+        // ⚠️ QUAN TRỌNG: Bạn hãy xóa dòng chữ 'THAY_LINK...' bên dưới và dán link Web App của bạn vào (có đuôi /exec)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIwIBXRZI6H3xMWrl544duJWyj8L4ymCzWAx4i9-2-oslu8QOybBfzroX6ZMJ-lneMOw/exec';
         
         // Cập nhật GID Mới của file bản sao
         const SHEET_ID = '1D0H2qnZmc7yw_yVbwlPOQbKqqr0Q_DMGynxDh8jV0SU'; 
@@ -180,13 +182,7 @@
                 const list = document.getElementById('reviewList');
                 list.innerHTML = ""; 
                 
-                // Sheet Feedback: Cột A(Time), B(Tên), C(Sao), D(Lời nhắn)
-                // Duyệt từ dưới lên
                 let count = 0;
-                // Vì dòng 0 là tiêu đề, dữ liệu bắt đầu từ dòng 1
-                // Lưu ý: Row Index trong Excel = i + 1 (vì mảng bắt đầu từ 0)
-                // Tuy nhiên khi gửi lệnh xóa, Apps Script tính dòng bắt đầu từ 1.
-                // i trong mảng rows tương ứng dòng (i+1) trong Excel.
                 
                 for (let i = rows.length - 1; i >= 1; i--) {
                     const row = rows[i];
@@ -200,7 +196,6 @@
                         let starsStr = ""; 
                         for(let s=0; s<starVal; s++) starsStr += "★";
                         
-                        // Nút xóa chỉ hiện khi là Admin
                         const deleteBtn = isAdmin ? 
                             `<button onclick="deleteReview(${i + 1}, this)" class="btn-delete absolute top-2 right-2 text-red-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm hover:shadow-md" title="Xóa bình luận này">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -233,30 +228,34 @@
             }
         }
 
-        // --- HÀM XÓA BÌNH LUẬN (CHỈ ADMIN) ---
         function deleteReview(rowIndex, btnElement) {
             const password = prompt("🔒 Nhập mật khẩu Admin để xóa:");
             if (!password) return;
 
             const originalIcon = btnElement.innerHTML;
-            btnElement.innerHTML = "⏳"; // Icon loading
+            btnElement.innerHTML = "⏳"; 
             btnElement.disabled = true;
 
-            // Gửi lệnh xóa qua form data
             const formData = new FormData();
             formData.append('action', 'delete');
             formData.append('row', rowIndex);
             formData.append('password', password);
 
-            // Dùng mode 'no-cors' vì Apps Script Web App trả về JSON redirect
+            // Kiểm tra link trước khi gửi
+            if (SCRIPT_URL.includes("THAY_LINK")) {
+                alert("Bạn chưa cập nhật SCRIPT_URL trong code!");
+                btnElement.innerHTML = originalIcon;
+                btnElement.disabled = false;
+                return;
+            }
+
             fetch(SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' })
                 .then(() => {
                     alert("Đã gửi lệnh xóa. Dữ liệu sẽ cập nhật sau vài giây.");
-                    // Ẩn tạm thời card đó đi
                     const card = btnElement.closest('.review-card');
                     card.style.opacity = '0.5';
                     card.style.transform = 'scale(0.9)';
-                    setTimeout(loadReviews, 3000); // Tải lại sau 3s
+                    setTimeout(loadReviews, 3000); 
                 })
                 .catch(err => {
                     alert("Lỗi kết nối!");
@@ -268,14 +267,11 @@
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             
-            // KIỂM TRA CHẾ ĐỘ ADMIN
             if (urlParams.get('admin') === '1') {
                 isAdmin = true;
-                // Thêm viền đỏ nhẹ để biết đang ở chế độ Admin
                 document.body.style.borderTop = "4px solid red";
             }
 
-            // KIỂM TRA CHẾ ĐỘ XEM (View Only)
             const viewMode = urlParams.get('view');
             if (viewMode === 'only') {
                 document.getElementById('leftColumn').classList.add('hidden-mode');
@@ -325,6 +321,13 @@
         const form = document.getElementById('feedbackForm');
         form.addEventListener('submit', e => {
             e.preventDefault();
+            
+            // KIỂM TRA LINK TRƯỚC
+            if (SCRIPT_URL.includes("THAY_LINK") || SCRIPT_URL.length < 10) {
+                alert("⚠️ LỖI CẤU HÌNH:\nBạn chưa dán link Web App của mình vào code!\n\nHãy vào Apps Script > Triển khai > Copy link '/exec' và dán vào dòng 'const SCRIPT_URL' trong file này.");
+                return;
+            }
+            
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
             
