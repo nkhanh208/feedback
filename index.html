@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback Station</title>
+    <title>Feedback Station - Cloud Storage</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
     <script>
@@ -51,11 +51,11 @@
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
         }
         .marquee-content {
+            /* Tạm tắt animation mặc định để JS xử lý scroll mượt hơn khi có data mới, 
+               hoặc có thể bật lại nếu muốn */
             animation: scrollUp 40s linear infinite; 
         }
-        @media (min-width: 768px) {
-            .marquee-content:hover { animation-play-state: paused; }
-        }
+        .marquee-content:hover { animation-play-state: paused; }
         
         @keyframes scrollUp {
             0% { transform: translateY(0); }
@@ -95,20 +95,20 @@
             
             <div class="mb-6">
                 <h2 class="text-3xl font-bold text-slate-800">GỬI GÓP Ý 📬</h2>
-                <p class="text-slate-500 text-sm mt-1">Ý kiến của bạn giúp thư viện hoàn thiện hơn!</p>
+                <p class="text-slate-500 text-sm mt-1">Dữ liệu được lưu trữ an toàn trên đám mây.</p>
             </div>
             
             <div id="emailAlert" class="hidden mb-4 bg-green-50 border border-green-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
                 <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">📧</div>
                 <div class="text-sm text-green-700">
-                    Chào <b><span id="alertName">Bạn</span></b>, đã nhận <b><span id="alertStar">5</span> sao</b> từ email. Viết thêm vài dòng nhé!
+                    Chào <b><span id="alertName">Bạn</span></b>, đã nhận <b><span id="alertStar">5</span> sao</b>.
                 </div>
             </div>
 
             <form id="feedbackForm" class="space-y-5 relative z-10">
                 <div>
                     <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">Danh tính</label>
-                    <input type="text" name="Tên" id="inpName" placeholder="VD: Mèo Béo 12A3" required class="tech-input w-full rounded-xl p-3">
+                    <input type="text" name="name" id="inpName" placeholder="VD: Mèo Béo 12A3" required class="tech-input w-full rounded-xl p-3">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider text-center">Mức độ hài lòng</label>
@@ -119,151 +119,244 @@
                         <span class="star text-3xl md:text-4xl" data-value="4">★</span>
                         <span class="star text-3xl md:text-4xl" data-value="5">★</span>
                     </div>
-                    <input type="hidden" name="Số sao" id="ratingInput" value="5">
+                    <input type="hidden" name="stars" id="ratingInput" value="5">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">Thông điệp</label>
-                    <textarea name="Lời nhắn" id="inpMsg" rows="3" placeholder="Sách hay lắm, nhưng cần thêm điều hòa..." required class="tech-input w-full rounded-xl p-3"></textarea>
+                    <textarea name="message" id="inpMsg" rows="3" placeholder="Góp ý của bạn..." required class="tech-input w-full rounded-xl p-3"></textarea>
                 </div>
                 <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transform active:scale-95 transition-all">
-                    🚀 GỬI PHẢN HỒI
+                    🚀 GỬI LÊN MÂY
                 </button>
             </form>
             
             <div id="successMsg" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm flex-col items-center justify-center text-center z-20 rounded-3xl p-6">
                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-bounce"><span class="text-4xl">🎉</span></div>
-                <h3 class="text-2xl font-bold text-slate-800">ĐÃ GỬI THÀNH CÔNG!</h3>
-                <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Cảm ơn bạn đã đóng góp ý kiến.</p>
-                <!-- Đổi nút để không reload trang -->
-                <button onclick="resetForm()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
+                <h3 class="text-2xl font-bold text-slate-800">ĐÃ LƯU THÀNH CÔNG!</h3>
+                <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Phản hồi đã được lưu vĩnh viễn.</p>
+                <button onclick="resetFormUI()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
             </div>
         </div>
 
-        <!-- CỘT PHẢI: TƯỜNG REVIEW (LẤY TỪ GOOGLE SHEETS) -->
+        <!-- CỘT PHẢI: TƯỜNG REVIEW (LẤY TỪ FIRESTORE) -->
         <div id="rightColumn" class="glass p-6 rounded-3xl flex flex-col h-[400px] md:h-full overflow-hidden transition-all duration-500 order-2 bg-white">
             <h3 class="text-xl font-bold mb-6 flex items-center gap-3 border-b border-slate-100 pb-4 text-slate-800">
                 <span class="w-1.5 h-8 bg-yellow-400 rounded-full"></span>
-                GÓC KHEN NGỢI 💖
+                GÓC FEEDBACK 💖
             </h3>
             
             <div class="flex-1 overflow-hidden marquee-container relative">
                 <div class="marquee-content space-y-4" id="reviewList">
-                    <!-- Dữ liệu thật sẽ được chèn vào đây -->
-                    <div class="text-center text-slate-400 py-10 loading-pulse">Đang tải review...</div>
+                    <div class="text-center text-slate-400 py-10 loading-pulse">Đang kết nối dữ liệu đám mây...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // --- CẤU HÌNH ---
-        // Link Web App Script (Chỉ dùng cho xóa, không dùng gửi nữa)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbcx9OLm4B1wbNf9eeVaANPjW027JBDz861SnlO7vu_eiBP_EEWBMZB7QDt4wrzapBi55A/exec';
-        
-        // Link Sheet
-        const SHEET_ID = '1D0H2qnZmc7yw_yVbwlPOQbKqqr0Q_DMGynxDh8jV0SU'; 
-        const FEEDBACK_GID = '861428398'; 
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Biến kiểm tra Admin
+        // 1. Cấu hình & Khởi tạo
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        let currentUser = null;
         let isAdmin = false;
 
-        async function loadReviews() {
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${FEEDBACK_GID}`;
-            
+        // Tên Collection (QUAN TRỌNG: Dùng đường dẫn public để mọi người cùng xem)
+        // artifacts/{appId}/public/data/reviews
+        const REVIEWS_COLLECTION = 'reviews'; 
+
+        // 2. Xử lý Authentication
+        async function initAuth() {
             try {
-                const response = await fetch(`${url}&_=${new Date().getTime()}`);
-                if (!response.ok) throw new Error("Lỗi HTTP: " + response.status);
-                const text = await response.text();
-                
-                if (text.trim().startsWith('<!DOCTYPE') || text.includes('<html')) {
-                    throw new Error("⚠️ Lỗi truy cập: Hãy kiểm tra quyền công bố Sheet.");
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
                 }
-
-                const rows = parseCSV(text);
-                const list = document.getElementById('reviewList');
-                list.innerHTML = ""; 
-                
-                let count = 0;
-                
-                for (let i = rows.length - 1; i >= 1; i--) {
-                    const row = rows[i];
-                    if (row.length < 4) continue;
-                    
-                    const name = row[1]; // Cột B
-                    const starVal = parseInt(row[2]) || 5; // Cột C
-                    const msg = row[3]; // Cột D
-
-                    if (name && msg) {
-                        let starsStr = ""; 
-                        for(let s=0; s<starVal; s++) starsStr += "★";
-                        
-                        const deleteBtn = isAdmin ? 
-                            `<button onclick="deleteReview(${i + 1}, this)" class="btn-delete absolute top-2 right-2 text-red-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm hover:shadow-md" title="Xóa bình luận này">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>` : '';
-
-                        const html = `
-                        <div class="review-card relative bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                            ${deleteBtn}
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="font-bold text-blue-600 truncate max-w-[80%]">${name}</span>
-                                <div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div>
-                            </div>
-                            <p class="text-slate-600 text-sm leading-relaxed break-words">"${msg}"</p>
-                        </div>`;
-                        list.innerHTML += html;
-                        count++;
-                    }
-                    if (count > 20) break;
-                }
-
-                if (count === 0) {
-                     list.innerHTML = `<div class="text-center text-slate-400 py-10">Chưa có đánh giá nào.<br>Hãy là người đầu tiên!</div>`;
-                }
-
             } catch (error) {
-                console.error(error);
-                document.getElementById('reviewList').innerHTML = `<div class="text-center text-red-400 p-4 bg-red-50 rounded-lg text-sm">${error.message}</div>`;
+                console.error("Lỗi đăng nhập:", error);
+                document.getElementById('reviewList').innerHTML = `<div class="text-red-500 text-center p-4">Lỗi kết nối Server. Vui lòng tải lại trang.</div>`;
             }
         }
 
-        function deleteReview(rowIndex, btnElement) {
-            const password = prompt("🔒 Nhập mật khẩu Admin để xóa:");
-            if (!password) return;
+        initAuth();
 
-            const originalIcon = btnElement.innerHTML;
-            btnElement.innerHTML = "⏳"; 
-            btnElement.disabled = true;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                // Sau khi có user, bắt đầu lắng nghe dữ liệu
+                listenToReviews();
+            }
+        });
 
-            const formData = new FormData();
-            formData.append('action', 'delete');
-            formData.append('row', rowIndex);
-            formData.append('password', password);
+        // 3. Lắng nghe dữ liệu (Real-time)
+        function listenToReviews() {
+            if (!currentUser) return;
 
-            if (SCRIPT_URL.includes("THAY_LINK")) {
-                alert("Bạn chưa cập nhật SCRIPT_URL trong code!");
-                btnElement.innerHTML = originalIcon;
-                btnElement.disabled = false;
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', REVIEWS_COLLECTION);
+            
+            // onSnapshot tự động chạy mỗi khi dữ liệu thay đổi trên server
+            onSnapshot(colRef, (snapshot) => {
+                const list = document.getElementById('reviewList');
+                const rawData = [];
+
+                snapshot.forEach(doc => {
+                    rawData.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sắp xếp client-side (Mới nhất lên đầu)
+                rawData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                renderReviews(rawData);
+            }, (error) => {
+                console.error("Lỗi lấy dữ liệu:", error);
+            });
+        }
+
+        // 4. Render giao diện
+        function renderReviews(reviews) {
+            const list = document.getElementById('reviewList');
+            
+            if (reviews.length === 0) {
+                list.innerHTML = `<div class="text-center text-slate-400 py-10">Chưa có đánh giá nào.<br>Hãy là người đầu tiên!</div>`;
                 return;
             }
 
-            fetch(SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' })
-                .then(() => {
-                    alert("Đã gửi lệnh xóa. Dữ liệu sẽ cập nhật sau vài giây.");
-                    const card = btnElement.closest('.review-card');
-                    card.style.opacity = '0.5';
-                    card.style.transform = 'scale(0.9)';
-                    setTimeout(loadReviews, 3000); 
-                })
-                .catch(err => {
-                    alert("Lỗi kết nối!");
-                    btnElement.innerHTML = originalIcon;
-                    btnElement.disabled = false;
+            // Tạo HTML chuỗi
+            // Nhân đôi danh sách để tạo hiệu ứng marquee mượt mà nếu ít item (optional technique)
+            // Ở đây ta render bình thường.
+            
+            let htmlContent = '';
+            reviews.forEach(review => {
+                let starsStr = "";
+                const starCount = parseInt(review.stars) || 5;
+                for(let s=0; s<starCount; s++) starsStr += "★";
+
+                // Nút xóa (Giả lập logic Admin cũ)
+                const deleteBtn = isAdmin ? 
+                    `<button data-id="${review.id}" class="btn-delete-real absolute top-2 right-2 text-red-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm hover:shadow-md" title="Xóa">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>` : '';
+
+                htmlContent += `
+                    <div class="review-card relative bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        ${deleteBtn}
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-blue-600 truncate max-w-[80%]">${escapeHtml(review.name)}</span>
+                            <div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div>
+                        </div>
+                        <p class="text-slate-600 text-sm leading-relaxed break-words">"${escapeHtml(review.message)}"</p>
+                        <p class="text-[10px] text-slate-300 mt-2 text-right">${new Date(review.createdAt).toLocaleDateString('vi-VN')}</p>
+                    </div>`;
+            });
+
+            list.innerHTML = htmlContent;
+
+            // Gắn sự kiện xóa cho các nút vừa tạo
+            if (isAdmin) {
+                document.querySelectorAll('.btn-delete-real').forEach(btn => {
+                    btn.addEventListener('click', (e) => handleDelete(e.currentTarget));
                 });
+            }
         }
 
+        // 5. Xử lý Gửi Form
+        const form = document.getElementById('feedbackForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser) {
+                alert("Đang kết nối máy chủ, vui lòng đợi giây lát...");
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerText;
+            btn.innerHTML = '🚀 Đang lưu...';
+            btn.disabled = true;
+
+            const name = document.getElementById('inpName').value;
+            const message = document.getElementById('inpMsg').value;
+            const stars = document.getElementById('ratingInput').value;
+
+            try {
+                // Thêm vào Firestore
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', REVIEWS_COLLECTION), {
+                    name: name,
+                    message: message,
+                    stars: stars,
+                    createdAt: Date.now(),
+                    uid: currentUser.uid // Lưu ID người gửi để sau này có thể cho phép họ tự xóa
+                });
+
+                // Hiển thị UI thành công
+                document.getElementById('successMsg').classList.remove('hidden');
+                document.getElementById('successMsg').classList.add('flex');
+
+            } catch (error) {
+                console.error("Lỗi khi lưu:", error);
+                alert("Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // 6. Xử lý Xóa (Giữ logic cũ: hỏi mật khẩu)
+        async function handleDelete(btnElement) {
+            const docId = btnElement.getAttribute('data-id');
+            const password = prompt("🔒 Nhập mật khẩu Admin để xóa vĩnh viễn:");
+            // Mật khẩu demo đơn giản client-side, thực tế nên xử lý server rules
+            if (password !== "admin123") { 
+                if(password) alert("Sai mật khẩu!");
+                return;
+            }
+
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = "⏳";
+            
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', REVIEWS_COLLECTION, docId));
+                // Không cần làm gì thêm, onSnapshot sẽ tự cập nhật giao diện
+            } catch (error) {
+                console.error("Lỗi xóa:", error);
+                alert("Không thể xóa: " + error.message);
+                btnElement.innerHTML = originalHtml;
+            }
+        }
+
+        // Helper: Escape HTML để chống XSS
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Export ra window để nút Reset gọi được
+        window.resetFormUI = function() {
+            document.getElementById('feedbackForm').reset();
+            // Reset sao về 5
+            document.getElementById('ratingInput').value = 5;
+            updateStars(5);
+            document.getElementById('successMsg').classList.add('hidden');
+            document.getElementById('successMsg').classList.remove('flex');
+        }
+
+        // Logic cũ cho UI (Sao, URL Params)
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             
@@ -280,8 +373,6 @@
                 document.getElementById('mainContainer').classList.add('grid-cols-1');
             }
 
-            loadReviews();
-
             const paramName = urlParams.get('name');
             const paramStar = urlParams.get('star');
 
@@ -295,7 +386,6 @@
                 document.getElementById('alertStar').innerText = paramStar;
                 if (paramName) {
                     document.getElementById('emailAlert').classList.remove('hidden');
-                    if (viewMode !== 'only') setTimeout(() => document.getElementById('inpMsg').focus(), 500);
                 }
             }
         };
@@ -317,78 +407,6 @@
                 updateStars(val);
             });
         });
-
-        // --- XỬ LÝ GỬI FORM (KHÔNG GỬI VỀ SHEET, CHỈ HIỆN UI) ---
-        const form = document.getElementById('feedbackForm');
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerText;
-            
-            btn.innerHTML = '⏳ Đang gửi...';
-            btn.disabled = true;
-            btn.classList.add('opacity-70');
-
-            // 1. Lấy dữ liệu để hiển thị NGAY LẬP TỨC
-            const name = form.querySelector('input[name="Tên"]').value;
-            const msg = form.querySelector('textarea[name="Lời nhắn"]').value;
-            const star = ratingInput.value;
-            let starsStr = ""; for(let i=0; i<star; i++) starsStr += "★";
-
-            // Tạo HTML thẻ review mới
-            const newReviewHtml = `
-            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md ring-2 ring-blue-100 animate-[pulse_1s]">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="font-bold text-blue-600">${name}</span>
-                    <div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div>
-                </div>
-                <p class="text-slate-700 text-sm leading-relaxed">${msg}</p>
-                <p class="text-[10px] text-slate-400 mt-2 italic">Vừa xong</p>
-            </div>`;
-
-            // 2. GIẢ LẬP GỬI THÀNH CÔNG (KHÔNG FETCH)
-            setTimeout(() => {
-                // Hiện thông báo thành công
-                document.getElementById('successMsg').classList.remove('hidden');
-                document.getElementById('successMsg').classList.add('flex');
-                
-                // Chèn review vào danh sách ngay lập tức
-                document.getElementById('reviewList').insertAdjacentHTML('afterbegin', newReviewHtml);
-                
-                // Reset nút
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                btn.classList.remove('opacity-70');
-            }, 800); // Delay giả 0.8s
-        });
-        
-        function resetForm() {
-            document.getElementById('successMsg').classList.add('hidden');
-            document.getElementById('successMsg').classList.remove('flex');
-            form.reset();
-            ratingInput.value = 5;
-            updateStars(5);
-        }
-
-        function parseCSV(str) {
-            const arr = [];
-            let quote = false;
-            let col = 0, row = 0;
-            for (let c = 0; c < str.length; c++) {
-                let cc = str[c], nc = str[c+1];
-                arr[row] = arr[row] || [];
-                arr[row][col] = arr[row][col] || '';
-                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; }
-                else if (cc == '"') { quote = !quote; }
-                else if (cc == ',' && !quote) { ++col; }
-                else if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; }
-                else if (cc == '\n' && !quote) { ++row; col = 0; }
-                else if (cc == '\r' && !quote) { ++row; col = 0; }
-                else { arr[row][col] += cc; }
-            }
-            return arr;
-        }
     </script>
 </body>
 </html>
