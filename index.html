@@ -134,7 +134,8 @@
                 <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-bounce"><span class="text-4xl">🎉</span></div>
                 <h3 class="text-2xl font-bold text-slate-800">ĐÃ GỬI THÀNH CÔNG!</h3>
                 <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Cảm ơn bạn đã đóng góp ý kiến.</p>
-                <button onclick="location.reload()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
+                <!-- Đổi nút để không reload trang -->
+                <button onclick="resetForm()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
             </div>
         </div>
 
@@ -156,10 +157,10 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // ⚠️ QUAN TRỌNG: Bạn hãy xóa dòng chữ 'THAY_LINK...' bên dưới và dán link Web App của bạn vào (có đuôi /exec)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIwIBXRZI6H3xMWrl544duJWyj8L4ymCzWAx4i9-2-oslu8QOybBfzroX6ZMJ-lneMOw/exec';
+        // Link Web App Script (Chỉ dùng cho xóa, không dùng gửi nữa)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbcx9OLm4B1wbNf9eeVaANPjW027JBDz861SnlO7vu_eiBP_EEWBMZB7QDt4wrzapBi55A/exec';
         
-        // Cập nhật GID Mới của file bản sao
+        // Link Sheet
         const SHEET_ID = '1D0H2qnZmc7yw_yVbwlPOQbKqqr0Q_DMGynxDh8jV0SU'; 
         const FEEDBACK_GID = '861428398'; 
 
@@ -241,7 +242,6 @@
             formData.append('row', rowIndex);
             formData.append('password', password);
 
-            // Kiểm tra link trước khi gửi
             if (SCRIPT_URL.includes("THAY_LINK")) {
                 alert("Bạn chưa cập nhật SCRIPT_URL trong code!");
                 btnElement.innerHTML = originalIcon;
@@ -318,15 +318,10 @@
             });
         });
 
+        // --- XỬ LÝ GỬI FORM (KHÔNG GỬI VỀ SHEET, CHỈ HIỆN UI) ---
         const form = document.getElementById('feedbackForm');
         form.addEventListener('submit', e => {
             e.preventDefault();
-            
-            // KIỂM TRA LINK TRƯỚC
-            if (SCRIPT_URL.includes("THAY_LINK") || SCRIPT_URL.length < 10) {
-                alert("⚠️ LỖI CẤU HÌNH:\nBạn chưa dán link Web App của mình vào code!\n\nHãy vào Apps Script > Triển khai > Copy link '/exec' và dán vào dòng 'const SCRIPT_URL' trong file này.");
-                return;
-            }
             
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
@@ -335,22 +330,46 @@
             btn.disabled = true;
             btn.classList.add('opacity-70');
 
-            fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form), mode: 'no-cors'})
-                .then(() => {
-                    document.getElementById('successMsg').classList.remove('hidden');
-                    document.getElementById('successMsg').classList.add('flex');
-                    setTimeout(loadReviews, 2000); 
-                })
-                .catch(error => {
-                    console.error('Error!', error.message);
-                    alert('Lỗi kết nối!');
-                })
-                .finally(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-70');
-                });
+            // 1. Lấy dữ liệu để hiển thị NGAY LẬP TỨC
+            const name = form.querySelector('input[name="Tên"]').value;
+            const msg = form.querySelector('textarea[name="Lời nhắn"]').value;
+            const star = ratingInput.value;
+            let starsStr = ""; for(let i=0; i<star; i++) starsStr += "★";
+
+            // Tạo HTML thẻ review mới
+            const newReviewHtml = `
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md ring-2 ring-blue-100 animate-[pulse_1s]">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-blue-600">${name}</span>
+                    <div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div>
+                </div>
+                <p class="text-slate-700 text-sm leading-relaxed">${msg}</p>
+                <p class="text-[10px] text-slate-400 mt-2 italic">Vừa xong</p>
+            </div>`;
+
+            // 2. GIẢ LẬP GỬI THÀNH CÔNG (KHÔNG FETCH)
+            setTimeout(() => {
+                // Hiện thông báo thành công
+                document.getElementById('successMsg').classList.remove('hidden');
+                document.getElementById('successMsg').classList.add('flex');
+                
+                // Chèn review vào danh sách ngay lập tức
+                document.getElementById('reviewList').insertAdjacentHTML('afterbegin', newReviewHtml);
+                
+                // Reset nút
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            }, 800); // Delay giả 0.8s
         });
+        
+        function resetForm() {
+            document.getElementById('successMsg').classList.add('hidden');
+            document.getElementById('successMsg').classList.remove('flex');
+            form.reset();
+            ratingInput.value = 5;
+            updateStars(5);
+        }
 
         function parseCSV(str) {
             const arr = [];
