@@ -12,9 +12,9 @@
                 extend: {
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
-                        primary: '#2563eb', // Xanh dương đậm hơn cho nền sáng
-                        secondary: '#9333ea', // Tím
-                        accent: '#f59e0b', // Vàng
+                        primary: '#2563eb',
+                        secondary: '#9333ea',
+                        accent: '#f59e0b',
                     }
                 }
             }
@@ -22,39 +22,35 @@
     </script>
     <style>
         body {
-            /* NỀN TRẮNG SÁNG */
-            background-color: #f8fafc; /* Slate-50: Trắng hơi xám nhẹ cho dịu mắt */
-            color: #1e293b; /* Slate-800: Chữ màu đen xám */
+            background-color: #f8fafc;
+            color: #1e293b;
             overflow-y: auto;
             overflow-x: hidden;
         }
         
-        /* Hiệu ứng kính sáng (Light Glass) */
         .glass {
             background: rgba(255, 255, 255, 0.7); 
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
         }
 
         .star {
             cursor: pointer; transition: transform 0.2s, color 0.2s;
-            font-size: 2.5rem; color: #cbd5e1; /* Màu xám nhạt khi chưa chọn */
+            font-size: 2.5rem; color: #cbd5e1;
         }
         .star.active { 
-            color: #f59e0b; /* Màu vàng cam */
+            color: #f59e0b; 
             filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.5)); 
         }
         .star:hover { transform: scale(1.2); }
         
-        /* Hiệu ứng trôi tin nhắn (Marquee) */
         .marquee-container {
-            /* Mask mờ dần ở trên và dưới cho nền trắng */
             mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
         }
         .marquee-content {
-            animation: scrollUp 30s linear infinite; 
+            animation: scrollUp 40s linear infinite; 
         }
         @media (min-width: 768px) {
             .marquee-content:hover { animation-play-state: paused; }
@@ -65,32 +61,36 @@
             100% { transform: translateY(-50%); }
         }
 
-        /* Input nền sáng */
         .tech-input {
             background: #ffffff;
-            border: 1px solid #cbd5e1; /* Border xám nhạt */
+            border: 1px solid #cbd5e1;
             transition: all 0.3s;
             color: #334155;
         }
         .tech-input:focus {
-            border-color: #2563eb; /* Xanh dương */
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); /* Glow nhẹ */
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
             outline: none;
         }
-        .tech-input::placeholder { color: #94a3b8; }
-        
         .hidden-mode { display: none !important; }
         .full-width { grid-column: span 2 !important; }
+        
+        /* Nút xóa cho Admin */
+        .btn-delete {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .review-card:hover .btn-delete {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 bg-slate-50">
 
-    <!-- Grid Container -->
     <div id="mainContainer" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 h-auto md:h-[600px] mb-10">
         
-        <!-- CỘT TRÁI: FORM ĐÁNH GIÁ -->
+        <!-- CỘT TRÁI: FORM -->
         <div id="leftColumn" class="glass p-6 md:p-8 rounded-3xl flex flex-col justify-center relative overflow-hidden transition-all duration-500 order-1 bg-white">
-            <!-- Dải màu trang trí phía trên -->
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
             
             <div class="mb-6">
@@ -131,16 +131,14 @@
             </form>
             
             <div id="successMsg" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm flex-col items-center justify-center text-center z-20 rounded-3xl p-6">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-bounce">
-                    <span class="text-4xl">🎉</span>
-                </div>
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-bounce"><span class="text-4xl">🎉</span></div>
                 <h3 class="text-2xl font-bold text-slate-800">ĐÃ GỬI THÀNH CÔNG!</h3>
-                <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Cảm ơn bạn đã đóng góp ý kiến xây dựng thư viện.</p>
+                <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Cảm ơn bạn đã đóng góp ý kiến.</p>
                 <button onclick="location.reload()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
             </div>
         </div>
 
-        <!-- CỘT PHẢI: WALL OF LOVE -->
+        <!-- CỘT PHẢI: TƯỜNG REVIEW -->
         <div id="rightColumn" class="glass p-6 rounded-3xl flex flex-col h-[400px] md:h-full overflow-hidden transition-all duration-500 order-2 bg-white">
             <h3 class="text-xl font-bold mb-6 flex items-center gap-3 border-b border-slate-100 pb-4 text-slate-800">
                 <span class="w-1.5 h-8 bg-yellow-400 rounded-full"></span>
@@ -149,44 +147,7 @@
             
             <div class="flex-1 overflow-hidden marquee-container relative">
                 <div class="marquee-content space-y-4" id="reviewList">
-                    
-                    <!-- REVIEW MẪU (STYLE SÁNG) -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-blue-600">Minh Anh 11A2</span>
-                            <div class="flex text-yellow-400 text-xs">★★★★★</div>
-                        </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">"Thư viện có nhiều sách hay quá, thích nhất cuốn Nhà Giả Kim! Không gian cũng rất chill."</p>
-                    </div>
-
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-purple-600">Tuấn Hưng</span>
-                            <div class="flex text-yellow-400 text-xs">★★★★★</div>
-                        </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">"Web thư viện xịn xò thực sự. Chức năng Chatbot đỉnh của chóp! 10 điểm."</p>
-                    </div>
-
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-green-600">Ngọc Huyền</span>
-                            <div class="flex text-yellow-400 text-xs">★★★★☆</div>
-                        </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">"Hy vọng thư viện nhập thêm trọn bộ Conan ạ ^^ Đợi mãi chưa thấy."</p>
-                    </div>
-                    
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-pink-600">Ẩn danh</span>
-                            <div class="flex text-yellow-400 text-xs">★★★★★</div>
-                        </div>
-                        <p class="text-slate-600 text-sm leading-relaxed">"Cô thủ thư dễ tính lắm luôn. Mọi người nhớ trả sách đúng hạn nhé."</p>
-                    </div>
-
-                     <!-- COPY LẠI ĐỂ LOOP CHO MƯỢT -->
-                    <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-600">Minh Anh 11A2</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div><p class="text-slate-600 text-sm">"Thư viện có nhiều sách hay quá, thích nhất cuốn Nhà Giả Kim!"</p></div>
-                     <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"><div class="flex justify-between items-center mb-2"><span class="font-bold text-purple-600">Tuấn Hưng</span><div class="flex text-yellow-400 text-xs">★★★★★</div></div><p class="text-slate-600 text-sm">"Web thư viện xịn xò thực sự. Chức năng Chatbot đỉnh!"</p></div>
-
+                    <div class="text-center text-slate-400 py-10 loading-pulse">Đang tải review...</div>
                 </div>
             </div>
         </div>
@@ -194,13 +155,127 @@
 
     <script>
         // --- CẤU HÌNH ---
-        // 👇 DÁN LINK WEB APP (/exec) CỦA BẠN VÀO ĐÂY 👇
-        // (Đã cập nhật lại link cũ của bạn cho tiện)
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxnJarLwzhRpF_ldnci5IBaiHFmuXp41KEpLtY_JJsgpqW64x9dgBNk7ujeZvstWN3tdQ/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbcx9OLm4B1wbNf9eeVaANPjW027JBDz861SnlO7vu_eiBP_EEWBMZB7QDt4wrzapBi55A/exec';
+        
+        // Cập nhật GID Mới của file bản sao
+        const SHEET_ID = '1D0H2qnZmc7yw_yVbwlPOQbKqqr0Q_DMGynxDh8jV0SU'; 
+        const FEEDBACK_GID = '861428398'; 
+
+        // Biến kiểm tra Admin
+        let isAdmin = false;
+
+        async function loadReviews() {
+            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${FEEDBACK_GID}`;
+            
+            try {
+                const response = await fetch(`${url}&_=${new Date().getTime()}`);
+                if (!response.ok) throw new Error("Lỗi HTTP: " + response.status);
+                const text = await response.text();
+                
+                if (text.trim().startsWith('<!DOCTYPE') || text.includes('<html')) {
+                    throw new Error("⚠️ Lỗi truy cập: Hãy kiểm tra quyền công bố Sheet.");
+                }
+
+                const rows = parseCSV(text);
+                const list = document.getElementById('reviewList');
+                list.innerHTML = ""; 
+                
+                // Sheet Feedback: Cột A(Time), B(Tên), C(Sao), D(Lời nhắn)
+                // Duyệt từ dưới lên
+                let count = 0;
+                // Vì dòng 0 là tiêu đề, dữ liệu bắt đầu từ dòng 1
+                // Lưu ý: Row Index trong Excel = i + 1 (vì mảng bắt đầu từ 0)
+                // Tuy nhiên khi gửi lệnh xóa, Apps Script tính dòng bắt đầu từ 1.
+                // i trong mảng rows tương ứng dòng (i+1) trong Excel.
+                
+                for (let i = rows.length - 1; i >= 1; i--) {
+                    const row = rows[i];
+                    if (row.length < 4) continue;
+                    
+                    const name = row[1]; // Cột B
+                    const starVal = parseInt(row[2]) || 5; // Cột C
+                    const msg = row[3]; // Cột D
+
+                    if (name && msg) {
+                        let starsStr = ""; 
+                        for(let s=0; s<starVal; s++) starsStr += "★";
+                        
+                        // Nút xóa chỉ hiện khi là Admin
+                        const deleteBtn = isAdmin ? 
+                            `<button onclick="deleteReview(${i + 1}, this)" class="btn-delete absolute top-2 right-2 text-red-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm hover:shadow-md" title="Xóa bình luận này">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>` : '';
+
+                        const html = `
+                        <div class="review-card relative bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                            ${deleteBtn}
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-blue-600 truncate max-w-[80%]">${name}</span>
+                                <div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div>
+                            </div>
+                            <p class="text-slate-600 text-sm leading-relaxed break-words">"${msg}"</p>
+                        </div>`;
+                        list.innerHTML += html;
+                        count++;
+                    }
+                    if (count > 20) break;
+                }
+
+                if (count === 0) {
+                     list.innerHTML = `<div class="text-center text-slate-400 py-10">Chưa có đánh giá nào.<br>Hãy là người đầu tiên!</div>`;
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('reviewList').innerHTML = `<div class="text-center text-red-400 p-4 bg-red-50 rounded-lg text-sm">${error.message}</div>`;
+            }
+        }
+
+        // --- HÀM XÓA BÌNH LUẬN (CHỈ ADMIN) ---
+        function deleteReview(rowIndex, btnElement) {
+            const password = prompt("🔒 Nhập mật khẩu Admin để xóa:");
+            if (!password) return;
+
+            const originalIcon = btnElement.innerHTML;
+            btnElement.innerHTML = "⏳"; // Icon loading
+            btnElement.disabled = true;
+
+            // Gửi lệnh xóa qua form data
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('row', rowIndex);
+            formData.append('password', password);
+
+            // Dùng mode 'no-cors' vì Apps Script Web App trả về JSON redirect
+            fetch(SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' })
+                .then(() => {
+                    alert("Đã gửi lệnh xóa. Dữ liệu sẽ cập nhật sau vài giây.");
+                    // Ẩn tạm thời card đó đi
+                    const card = btnElement.closest('.review-card');
+                    card.style.opacity = '0.5';
+                    card.style.transform = 'scale(0.9)';
+                    setTimeout(loadReviews, 3000); // Tải lại sau 3s
+                })
+                .catch(err => {
+                    alert("Lỗi kết nối!");
+                    btnElement.innerHTML = originalIcon;
+                    btnElement.disabled = false;
+                });
+        }
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             
+            // KIỂM TRA CHẾ ĐỘ ADMIN
+            if (urlParams.get('admin') === '1') {
+                isAdmin = true;
+                // Thêm viền đỏ nhẹ để biết đang ở chế độ Admin
+                document.body.style.borderTop = "4px solid red";
+            }
+
+            // KIỂM TRA CHẾ ĐỘ XEM (View Only)
             const viewMode = urlParams.get('view');
             if (viewMode === 'only') {
                 document.getElementById('leftColumn').classList.add('hidden-mode');
@@ -208,6 +283,8 @@
                 document.getElementById('mainContainer').classList.remove('md:grid-cols-2');
                 document.getElementById('mainContainer').classList.add('grid-cols-1');
             }
+
+            loadReviews();
 
             const paramName = urlParams.get('name');
             const paramStar = urlParams.get('star');
@@ -222,9 +299,7 @@
                 document.getElementById('alertStar').innerText = paramStar;
                 if (paramName) {
                     document.getElementById('emailAlert').classList.remove('hidden');
-                    if (viewMode !== 'only') {
-                        setTimeout(() => document.getElementById('inpMsg').focus(), 500);
-                    }
+                    if (viewMode !== 'only') setTimeout(() => document.getElementById('inpMsg').focus(), 500);
                 }
             }
         };
@@ -257,37 +332,41 @@
             btn.disabled = true;
             btn.classList.add('opacity-70');
 
-            // --- SỬA LỖI CỐT LÕI: THÊM mode: 'no-cors' ---
-            fetch(SCRIPT_URL, { 
-                method: 'POST', 
-                body: new FormData(form),
-                mode: 'no-cors' // <--- Dòng này giúp vượt qua lỗi Failed to fetch
-            })
-            .then(() => {
-                // Với no-cors, ta không biết kết quả chính xác, nhưng nếu không lỗi mạng thì coi như thành công
-                document.getElementById('successMsg').classList.remove('hidden');
-                document.getElementById('successMsg').classList.add('flex');
-                
-                // Thêm review ảo vào cột bên phải ngay lập tức
-                const name = form.querySelector('input[name="Tên"]').value;
-                const msg = form.querySelector('textarea[name="Lời nhắn"]').value;
-                const star = ratingInput.value;
-                let starsStr = ""; for(let i=0; i<star; i++) starsStr += "★";
-                
-                const html = `<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md ring-2 ring-blue-100 animate-[pulse_1s]"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-600">${name}</span><div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div></div><p class="text-slate-700 text-sm leading-relaxed">${msg}</p><p class="text-[10px] text-slate-400 mt-2 italic">Vừa xong</p></div>`;
-                document.getElementById('reviewList').insertAdjacentHTML('afterbegin', html);
-            })
-            .catch(error => {
-                console.error('Error!', error.message);
-                alert('Lỗi kết nối mạng! Vui lòng thử lại.');
-            })
-            .finally(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                btn.classList.remove('opacity-70');
-            });
+            fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form), mode: 'no-cors'})
+                .then(() => {
+                    document.getElementById('successMsg').classList.remove('hidden');
+                    document.getElementById('successMsg').classList.add('flex');
+                    setTimeout(loadReviews, 2000); 
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    alert('Lỗi kết nối!');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70');
+                });
         });
+
+        function parseCSV(str) {
+            const arr = [];
+            let quote = false;
+            let col = 0, row = 0;
+            for (let c = 0; c < str.length; c++) {
+                let cc = str[c], nc = str[c+1];
+                arr[row] = arr[row] || [];
+                arr[row][col] = arr[row][col] || '';
+                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; }
+                else if (cc == '"') { quote = !quote; }
+                else if (cc == ',' && !quote) { ++col; }
+                else if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; }
+                else if (cc == '\n' && !quote) { ++row; col = 0; }
+                else if (cc == '\r' && !quote) { ++row; col = 0; }
+                else { arr[row][col] += cc; }
+            }
+            return arr;
+        }
     </script>
 </body>
 </html>
-
