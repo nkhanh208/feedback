@@ -195,6 +195,7 @@
     <script>
         // --- CẤU HÌNH ---
         // 👇 DÁN LINK WEB APP (/exec) CỦA BẠN VÀO ĐÂY 👇
+        // (Đã cập nhật lại link cũ của bạn cho tiện)
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbcx9OLm4B1wbNf9eeVaANPjW027JBDz861SnlO7vu_eiBP_EEWBMZB7QDt4wrzapBi55A/exec';
 
         window.onload = function() {
@@ -256,28 +257,35 @@
             btn.disabled = true;
             btn.classList.add('opacity-70');
 
-            fetch(SCRIPT_URL, { method: 'POST', body: new FormData(form)})
-                .then(response => {
-                    document.getElementById('successMsg').classList.remove('hidden');
-                    document.getElementById('successMsg').classList.add('flex');
-                    
-                    const name = form.querySelector('input[name="Tên"]').value;
-                    const msg = form.querySelector('textarea[name="Lời nhắn"]').value;
-                    const star = ratingInput.value;
-                    let starsStr = ""; for(let i=0; i<star; i++) starsStr += "★";
-                    // HTML cho review mới (Style sáng)
-                    const html = `<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md ring-2 ring-blue-100 animate-[pulse_1s]"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-600">${name}</span><div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div></div><p class="text-slate-700 text-sm leading-relaxed">${msg}</p><p class="text-[10px] text-slate-400 mt-2 italic">Vừa xong</p></div>`;
-                    document.getElementById('reviewList').insertAdjacentHTML('afterbegin', html);
-                })
-                .catch(error => {
-                    console.error('Error!', error.message);
-                    alert('Lỗi kết nối! Vui lòng thử lại.');
-                })
-                .finally(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-70');
-                });
+            // --- SỬA LỖI CỐT LÕI: THÊM mode: 'no-cors' ---
+            fetch(SCRIPT_URL, { 
+                method: 'POST', 
+                body: new FormData(form),
+                mode: 'no-cors' // <--- Dòng này giúp vượt qua lỗi Failed to fetch
+            })
+            .then(() => {
+                // Với no-cors, ta không biết kết quả chính xác, nhưng nếu không lỗi mạng thì coi như thành công
+                document.getElementById('successMsg').classList.remove('hidden');
+                document.getElementById('successMsg').classList.add('flex');
+                
+                // Thêm review ảo vào cột bên phải ngay lập tức
+                const name = form.querySelector('input[name="Tên"]').value;
+                const msg = form.querySelector('textarea[name="Lời nhắn"]').value;
+                const star = ratingInput.value;
+                let starsStr = ""; for(let i=0; i<star; i++) starsStr += "★";
+                
+                const html = `<div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-md ring-2 ring-blue-100 animate-[pulse_1s]"><div class="flex justify-between items-center mb-2"><span class="font-bold text-blue-600">${name}</span><div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div></div><p class="text-slate-700 text-sm leading-relaxed">${msg}</p><p class="text-[10px] text-slate-400 mt-2 italic">Vừa xong</p></div>`;
+                document.getElementById('reviewList').insertAdjacentHTML('afterbegin', html);
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert('Lỗi kết nối mạng! Vui lòng thử lại.');
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                btn.classList.remove('opacity-70');
+            });
         });
     </script>
 </body>
