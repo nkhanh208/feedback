@@ -2,411 +2,157 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <title>Gửi Feedback</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback Station - Cloud Storage</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    colors: {
-                        primary: '#2563eb',
-                        secondary: '#9333ea',
-                        accent: '#f59e0b',
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.7); 
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
-        }
-
-        .star {
-            cursor: pointer; transition: transform 0.2s, color 0.2s;
-            font-size: 2.5rem; color: #cbd5e1;
-        }
-        .star.active { 
-            color: #f59e0b; 
-            filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.5)); 
-        }
-        .star:hover { transform: scale(1.2); }
-        
-        /* Marquee Animation */
-        .marquee-container {
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-        }
-        .marquee-content {
-            /* Tạm tắt animation mặc định để JS xử lý scroll mượt hơn khi có data mới, 
-               hoặc có thể bật lại nếu muốn */
-            animation: scrollUp 40s linear infinite; 
-        }
-        .marquee-content:hover { animation-play-state: paused; }
-        
-        @keyframes scrollUp {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-50%); }
-        }
-
-        .tech-input {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            transition: all 0.3s;
-            color: #334155;
-        }
-        .tech-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            outline: none;
-        }
-        .hidden-mode { display: none !important; }
-        .full-width { grid-column: span 2 !important; }
-        
-        .btn-delete {
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .review-card:hover .btn-delete {
-            opacity: 1;
-        }
-    </style>
-</head>
-<body class="flex items-center justify-center min-h-screen p-4 bg-slate-50">
-
-    <div id="mainContainer" class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 h-auto md:h-[600px] mb-10">
-        
-        <!-- CỘT TRÁI: FORM (GỬI DỮ LIỆU) -->
-        <div id="leftColumn" class="glass p-6 md:p-8 rounded-3xl flex flex-col justify-center relative overflow-hidden transition-all duration-500 order-1 bg-white">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-purple-500"></div>
-            
-            <div class="mb-6">
-                <h2 class="text-3xl font-bold text-slate-800">GỬI GÓP Ý 📬</h2>
-                <p class="text-slate-500 text-sm mt-1">Dữ liệu được lưu trữ an toàn trên đám mây.</p>
-            </div>
-            
-            <div id="emailAlert" class="hidden mb-4 bg-green-50 border border-green-200 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">📧</div>
-                <div class="text-sm text-green-700">
-                    Chào <b><span id="alertName">Bạn</span></b>, đã nhận <b><span id="alertStar">5</span> sao</b>.
-                </div>
-            </div>
-
-            <form id="feedbackForm" class="space-y-5 relative z-10">
-                <div>
-                    <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">Danh tính</label>
-                    <input type="text" name="name" id="inpName" placeholder="VD: Mèo Béo 12A3" required class="tech-input w-full rounded-xl p-3">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider text-center">Mức độ hài lòng</label>
-                    <div class="flex justify-center gap-2 py-1" id="starContainer">
-                        <span class="star text-3xl md:text-4xl" data-value="1">★</span>
-                        <span class="star text-3xl md:text-4xl" data-value="2">★</span>
-                        <span class="star text-3xl md:text-4xl" data-value="3">★</span>
-                        <span class="star text-3xl md:text-4xl" data-value="4">★</span>
-                        <span class="star text-3xl md:text-4xl" data-value="5">★</span>
-                    </div>
-                    <input type="hidden" name="stars" id="ratingInput" value="5">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-500 font-bold mb-1 uppercase tracking-wider">Thông điệp</label>
-                    <textarea name="message" id="inpMsg" rows="3" placeholder="Góp ý của bạn..." required class="tech-input w-full rounded-xl p-3"></textarea>
-                </div>
-                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/30 transform active:scale-95 transition-all">
-                    🚀 GỬI LÊN MÂY
-                </button>
-            </form>
-            
-            <div id="successMsg" class="hidden absolute inset-0 bg-white/95 backdrop-blur-sm flex-col items-center justify-center text-center z-20 rounded-3xl p-6">
-                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-bounce"><span class="text-4xl">🎉</span></div>
-                <h3 class="text-2xl font-bold text-slate-800">ĐÃ LƯU THÀNH CÔNG!</h3>
-                <p class="text-slate-500 mt-2 mb-8 max-w-xs mx-auto">Phản hồi đã được lưu vĩnh viễn.</p>
-                <button onclick="resetFormUI()" class="px-6 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 text-slate-600 transition font-medium text-sm">Gửi phản hồi khác</button>
-            </div>
-        </div>
-
-        <!-- CỘT PHẢI: TƯỜNG REVIEW (LẤY TỪ FIRESTORE) -->
-        <div id="rightColumn" class="glass p-6 rounded-3xl flex flex-col h-[400px] md:h-full overflow-hidden transition-all duration-500 order-2 bg-white">
-            <h3 class="text-xl font-bold mb-6 flex items-center gap-3 border-b border-slate-100 pb-4 text-slate-800">
-                <span class="w-1.5 h-8 bg-yellow-400 rounded-full"></span>
-                GÓC FEEDBACK 💖
-            </h3>
-            
-            <div class="flex-1 overflow-hidden marquee-container relative">
-                <div class="marquee-content space-y-4" id="reviewList">
-                    <div class="text-center text-slate-400 py-10 loading-pulse">Đang kết nối dữ liệu đám mây...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
+    <!-- FONT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-        // 1. Cấu hình & Khởi tạo
-        const firebaseConfig = JSON.parse(__firebase_config);
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSkY9L3e6e4hmduWuP_SIJskDPEftzelQ",
+            authDomain: "feedback-1310.firebaseapp.com",
+            projectId: "feedback-1310",
+        };
+
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        let currentUser = null;
-        let isAdmin = false;
 
-        // Tên Collection (QUAN TRỌNG: Dùng đường dẫn public để mọi người cùng xem)
-        // artifacts/{appId}/public/data/reviews
-        const REVIEWS_COLLECTION = 'reviews'; 
+        // --- CODE MỚI: TỰ ĐỘNG ĐIỀN TÊN VÀ LỚP TỪ URL ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const nameParam = params.get("name");
+            const classParam = params.get("class");
 
-        // 2. Xử lý Authentication
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Lỗi đăng nhập:", error);
-                document.getElementById('reviewList').innerHTML = `<div class="text-red-500 text-center p-4">Lỗi kết nối Server. Vui lòng tải lại trang.</div>`;
+            const nameInput = document.getElementById("name");
+            const classInput = document.getElementById("class");
+
+            if (nameParam) {
+                nameInput.value = nameParam;
+                nameInput.setAttribute("readonly", true); // Khóa không cho sửa
+                nameInput.classList.add("locked"); // Thêm class để đổi màu nền
             }
-        }
 
-        initAuth();
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                // Sau khi có user, bắt đầu lắng nghe dữ liệu
-                listenToReviews();
+            if (classParam) {
+                classInput.value = classParam;
+                classInput.setAttribute("readonly", true); // Khóa không cho sửa
+                classInput.classList.add("locked");
             }
         });
+        // ------------------------------------------------
 
-        // 3. Lắng nghe dữ liệu (Real-time)
-        function listenToReviews() {
-            if (!currentUser) return;
+        window.sendFeedback = async () => {
+            const name = document.getElementById("name");
+            const classInput = document.getElementById("class");
+            const type = document.getElementById("type");
+            const content = document.getElementById("content");
 
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', REVIEWS_COLLECTION);
-            
-            // onSnapshot tự động chạy mỗi khi dữ liệu thay đổi trên server
-            onSnapshot(colRef, (snapshot) => {
-                const list = document.getElementById('reviewList');
-                const rawData = [];
+            let valid = true;
+            [name, classInput, content].forEach(i => i.classList.remove("invalid", "valid"));
 
-                snapshot.forEach(doc => {
-                    rawData.push({ id: doc.id, ...doc.data() });
-                });
+            if (name.value.trim().length < 2) { name.classList.add("invalid"); valid = false; } else name.classList.add("valid");
+            // Cho phép lớp chứa chữ cái nếu cần (ví dụ 12A3), hoặc giữ nguyên regex số nếu chỉ dùng số
+            if (classInput.value.trim().length < 1) { classInput.classList.add("invalid"); valid = false; } else classInput.classList.add("valid");
+            if (content.value.trim().length < 5) { content.classList.add("invalid"); valid = false; } else content.classList.add("valid");
 
-                // Sắp xếp client-side (Mới nhất lên đầu)
-                rawData.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            if (!valid) return;
 
-                renderReviews(rawData);
-            }, (error) => {
-                console.error("Lỗi lấy dữ liệu:", error);
-            });
-        }
-
-        // 4. Render giao diện
-        function renderReviews(reviews) {
-            const list = document.getElementById('reviewList');
-            
-            if (reviews.length === 0) {
-                list.innerHTML = `<div class="text-center text-slate-400 py-10">Chưa có đánh giá nào.<br>Hãy là người đầu tiên!</div>`;
-                return;
-            }
-
-            // Tạo HTML chuỗi
-            // Nhân đôi danh sách để tạo hiệu ứng marquee mượt mà nếu ít item (optional technique)
-            // Ở đây ta render bình thường.
-            
-            let htmlContent = '';
-            reviews.forEach(review => {
-                let starsStr = "";
-                const starCount = parseInt(review.stars) || 5;
-                for(let s=0; s<starCount; s++) starsStr += "★";
-
-                // Nút xóa (Giả lập logic Admin cũ)
-                const deleteBtn = isAdmin ? 
-                    `<button data-id="${review.id}" class="btn-delete-real absolute top-2 right-2 text-red-400 hover:text-red-600 bg-white rounded-full p-1 shadow-sm hover:shadow-md" title="Xóa">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>` : '';
-
-                htmlContent += `
-                    <div class="review-card relative bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                        ${deleteBtn}
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-bold text-blue-600 truncate max-w-[80%]">${escapeHtml(review.name)}</span>
-                            <div class="flex text-yellow-400 text-xs tracking-widest">${starsStr}</div>
-                        </div>
-                        <p class="text-slate-600 text-sm leading-relaxed break-words">"${escapeHtml(review.message)}"</p>
-                        <p class="text-[10px] text-slate-300 mt-2 text-right">${new Date(review.createdAt).toLocaleDateString('vi-VN')}</p>
-                    </div>`;
-            });
-
-            list.innerHTML = htmlContent;
-
-            // Gắn sự kiện xóa cho các nút vừa tạo
-            if (isAdmin) {
-                document.querySelectorAll('.btn-delete-real').forEach(btn => {
-                    btn.addEventListener('click', (e) => handleDelete(e.currentTarget));
-                });
-            }
-        }
-
-        // 5. Xử lý Gửi Form
-        const form = document.getElementById('feedbackForm');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!currentUser) {
-                alert("Đang kết nối máy chủ, vui lòng đợi giây lát...");
-                return;
-            }
-
-            const btn = document.getElementById('submitBtn');
+            // Hiệu ứng loading nút
+            const btn = document.querySelector("button");
             const originalText = btn.innerText;
-            btn.innerHTML = '🚀 Đang lưu...';
+            btn.innerText = "Đang gửi...";
             btn.disabled = true;
 
-            const name = document.getElementById('inpName').value;
-            const message = document.getElementById('inpMsg').value;
-            const stars = document.getElementById('ratingInput').value;
-
             try {
-                // Thêm vào Firestore
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', REVIEWS_COLLECTION), {
-                    name: name,
-                    message: message,
-                    stars: stars,
-                    createdAt: Date.now(),
-                    uid: currentUser.uid // Lưu ID người gửi để sau này có thể cho phép họ tự xóa
+                await addDoc(collection(db, "feedbacks"), {
+                    name: name.value,
+                    class: classInput.value,
+                    type: type.value,
+                    content: content.value,
+                    createdAt: serverTimestamp()
                 });
-
-                // Hiển thị UI thành công
-                document.getElementById('successMsg').classList.remove('hidden');
-                document.getElementById('successMsg').classList.add('flex');
-
-            } catch (error) {
-                console.error("Lỗi khi lưu:", error);
-                alert("Có lỗi xảy ra khi lưu dữ liệu. Vui lòng thử lại.");
+                showToast("Gửi feedback thành công!!!", true);
+                
+                // Chỉ xóa nội dung, giữ lại tên và lớp
+                content.value = "";
+                content.classList.remove("valid");
+            } catch (e) {
+                console.error(e);
+                showToast("Có lỗi xảy ra, vui lòng thử lại.", false);
             } finally {
-                btn.innerHTML = originalText;
+                btn.innerText = originalText;
                 btn.disabled = false;
-            }
-        });
-
-        // 6. Xử lý Xóa (Giữ logic cũ: hỏi mật khẩu)
-        async function handleDelete(btnElement) {
-            const docId = btnElement.getAttribute('data-id');
-            const password = prompt("🔒 Nhập mật khẩu Admin để xóa vĩnh viễn:");
-            // Mật khẩu demo đơn giản client-side, thực tế nên xử lý server rules
-            if (password !== "admin123") { 
-                if(password) alert("Sai mật khẩu!");
-                return;
-            }
-
-            const originalHtml = btnElement.innerHTML;
-            btnElement.innerHTML = "⏳";
-            
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', REVIEWS_COLLECTION, docId));
-                // Không cần làm gì thêm, onSnapshot sẽ tự cập nhật giao diện
-            } catch (error) {
-                console.error("Lỗi xóa:", error);
-                alert("Không thể xóa: " + error.message);
-                btnElement.innerHTML = originalHtml;
-            }
-        }
-
-        // Helper: Escape HTML để chống XSS
-        function escapeHtml(text) {
-            if (!text) return "";
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        // Export ra window để nút Reset gọi được
-        window.resetFormUI = function() {
-            document.getElementById('feedbackForm').reset();
-            // Reset sao về 5
-            document.getElementById('ratingInput').value = 5;
-            updateStars(5);
-            document.getElementById('successMsg').classList.add('hidden');
-            document.getElementById('successMsg').classList.remove('flex');
-        }
-
-        // Logic cũ cho UI (Sao, URL Params)
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            if (urlParams.get('admin') === '1') {
-                isAdmin = true;
-                document.body.style.borderTop = "4px solid red";
-            }
-
-            const viewMode = urlParams.get('view');
-            if (viewMode === 'only') {
-                document.getElementById('leftColumn').classList.add('hidden-mode');
-                document.getElementById('rightColumn').classList.add('full-width');
-                document.getElementById('mainContainer').classList.remove('md:grid-cols-2');
-                document.getElementById('mainContainer').classList.add('grid-cols-1');
-            }
-
-            const paramName = urlParams.get('name');
-            const paramStar = urlParams.get('star');
-
-            if (paramName) {
-                document.getElementById('inpName').value = decodeURIComponent(paramName);
-                document.getElementById('alertName').innerText = decodeURIComponent(paramName);
-            }
-            if (paramStar) {
-                document.getElementById('ratingInput').value = paramStar;
-                updateStars(paramStar);
-                document.getElementById('alertStar').innerText = paramStar;
-                if (paramName) {
-                    document.getElementById('emailAlert').classList.remove('hidden');
-                }
             }
         };
 
-        const stars = document.querySelectorAll('.star');
-        const ratingInput = document.getElementById('ratingInput');
-        
-        function updateStars(val) {
-            stars.forEach(s => {
-                if(s.getAttribute('data-value') <= val) s.classList.add('active');
-                else s.classList.remove('active');
-            });
-        }
-        
-        stars.forEach(star => {
-            star.addEventListener('click', () => {
-                const val = star.getAttribute('data-value');
-                ratingInput.value = val;
-                updateStars(val);
-            });
-        });
+        window.showToast = (msg) => {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 3000);
+        };
     </script>
+
+    <style>
+        * { box-sizing: border-box }
+        body { margin: 0; padding: 40px; background: transparent; font-family: 'Inter', sans-serif; display: flex; justify-content: center; }
+        /* CARD */
+        .card { width: 720px; background: white; padding: 36px; border-radius: 26px; box-shadow: 0 40px 80px rgba(0, 0, 0, .08), inset 0 1px 0 rgba(255, 255, 255, .6); }
+        h2 { margin: 0 0 6px; text-align: center; }
+        .subtitle { color: #6b7280; margin-bottom: 28px; text-align: center; }
+        /* FORM */
+        .group { margin-bottom: 18px; }
+        label { font-size: 14px; font-weight: 500; margin-bottom: 6px; display: block; }
+        input, textarea, select { width: 100%; padding: 14px 16px; border-radius: 14px; border: 2px solid #e5e7eb; font-size: 15px; outline: none; transition: .25s; background: #fafafa; }
+        textarea { resize: none; height: 140px; }
+        
+        /* LOCKED STATE (Khi tự động điền) */
+        input.locked { background-color: #f3f4f6; color: #6b7280; cursor: not-allowed; border-color: #e5e7eb; }
+        
+        /* FOCUS */
+        input:not(.locked):focus, textarea:focus, select:focus { border-color: #2563eb; background: white; }
+        /* VALIDATION */
+        input.valid, textarea.valid { border-color: #22c55e; background: #f0fdf4; }
+        input.invalid, textarea.invalid { border-color: #ef4444; background: #fef2f2; }
+        /* BUTTON */
+        button { margin-top: 10px; width: 100%; padding: 15px; font-size: 16px; font-weight: 600; border: none; border-radius: 16px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; cursor: pointer; transition: .25s; }
+        button:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(37, 99, 235, .35); }
+        button:disabled { opacity: 0.7; cursor: wait; transform: none; }
+        /* TOAST */
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #22c55e; color: white; padding: 14px 22px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, .2); opacity: 0; transform: translateY(10px); transition: .3s; }
+        .toast.show { opacity: 1; transform: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>📨 Gửi Feedback</h2>
+        <div class="subtitle">Ý kiến của bạn giúp hệ thống tốt hơn</div>
+        <div class="group">
+            <label>Tên</label>
+            <input id="name" placeholder="Nhập tên của bạn">
+        </div>
+        <div class="group">
+            <label>Lớp</label>
+            <input id="class" placeholder="Ví dụ: 12A3">
+        </div>
+        <div class="group">
+            <label>Loại feedback</label>
+            <select id="type">
+                <option>Góp ý</option>
+                <option>Báo lỗi</option>
+                <option>Đề xuất</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>Nội dung</label>
+            <textarea id="content" placeholder="Nhập nội dung feedback..."></textarea>
+        </div>
+        <button onclick="sendFeedback()">Gửi feedback</button>
+    </div>
+    <div id="toast" class="toast"></div>
 </body>
 </html>
