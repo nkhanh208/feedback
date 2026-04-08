@@ -2,157 +2,248 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Gửi Feedback</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- FONT -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    <title>Feedback - Thư viện NHC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        /* Tùy chỉnh thanh cuộn */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* CSS cho các ô bị khóa không cho chỉnh sửa */
+        .readonly-input {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+            user-select: none;
+        }
+        .readonly-input::placeholder {
+            color: #94a3b8;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center items-center min-h-screen">
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBSkY9L3e6e4hmduWuP_SIJskDPEftzelQ",
-            authDomain: "feedback-1310.firebaseapp.com",
-            projectId: "feedback-1310",
-        };
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] p-8 border border-slate-100">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-slate-800">Gửi Feedback</h1>
+            <p class="text-sm text-slate-500 mt-2">Đóng góp của bạn giúp Thư viện NHC tốt hơn mỗi ngày</p>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        <form id="feedbackForm" class="space-y-5">
+            
+            <!-- Tên (Tự động điền từ Link) -->
+            <div>
+                <input type="text" id="fb-name" readonly class="readonly-input w-full px-5 py-3.5 rounded-xl border focus:outline-none text-sm" placeholder="Chưa rõ tên người gửi...">
+            </div>
 
-        // --- CODE MỚI: TỰ ĐỘNG ĐIỀN TÊN VÀ LỚP TỪ URL ---
-        window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const nameParam = params.get("name");
-            const classParam = params.get("class");
+            <!-- Email (Tự động điền từ Link) -->
+            <div>
+                <input type="email" id="fb-email" readonly class="readonly-input w-full px-5 py-3.5 rounded-xl border focus:outline-none text-sm" placeholder="Chưa rõ Email...">
+            </div>
 
-            const nameInput = document.getElementById("name");
-            const classInput = document.getElementById("class");
+            <!-- Lớp / Vai trò (Tự động điền từ Link) -->
+            <div>
+                <input type="text" id="fb-class" readonly class="readonly-input w-full px-5 py-3.5 rounded-xl border focus:outline-none text-sm" placeholder="Chưa rõ Lớp / Vai trò...">
+            </div>
 
-            if (nameParam) {
-                nameInput.value = nameParam;
-                nameInput.setAttribute("readonly", true); // Khóa không cho sửa
-                nameInput.classList.add("locked"); // Thêm class để đổi màu nền
+            <!-- Mã Thẻ (Tự động điền từ Link) -->
+            <div>
+                <input type="text" id="fb-cardId" readonly class="readonly-input w-full px-5 py-3.5 rounded-xl border focus:outline-none text-sm font-mono tracking-wider text-indigo-600" placeholder="Chưa rõ Mã thẻ...">
+            </div>
+
+            <!-- MENU DROPDOWN TÙY CHỈNH -->
+            <div class="relative" id="custom-dropdown-container">
+                <input type="hidden" id="fb-type">
+
+                <button type="button" id="dropdown-trigger" class="w-full flex justify-between items-center px-5 py-3.5 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none transition-all cursor-pointer hover:bg-slate-50">
+                    <span id="dropdown-selected-text" class="text-slate-400">-- Chọn loại feedback --</span>
+                    <svg id="dropdown-arrow" class="w-4 h-4 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+
+                <div id="dropdown-menu" class="absolute z-20 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-lg opacity-0 invisible transition-all duration-200 transform -translate-y-2">
+                    <ul class="py-2 text-sm text-slate-700">
+                        <li>
+                            <button type="button" data-value="bug" class="dropdown-option w-full text-left px-5 py-3 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3">
+                                <span class="text-lg">🐛</span> <span class="font-medium">Báo lỗi hệ thống (Bug)</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-value="suggestion" class="dropdown-option w-full text-left px-5 py-3 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3">
+                                <span class="text-lg">💡</span> <span class="font-medium">Góp ý cải thiện (Suggestion)</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button type="button" data-value="other" class="dropdown-option w-full text-left px-5 py-3 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-3">
+                                <span class="text-lg">💬</span> <span class="font-medium">Nội dung khác (Other)</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Nội dung Feedback -->
+            <div>
+                <textarea id="fb-content" required rows="4" class="w-full px-5 py-4 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none shadow-inner" placeholder="Nhập nội dung bạn muốn gửi..."></textarea>
+            </div>
+
+            <button type="submit" id="btn-submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-4 rounded-xl transition-all shadow-lg shadow-slate-200 flex justify-center items-center gap-2 text-sm mt-2">
+                <span>Gửi Feedback</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- SCRIPT GIAO DIỆN DROPDOWN -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const trigger = document.getElementById('dropdown-trigger');
+            const menu = document.getElementById('dropdown-menu');
+            const arrow = document.getElementById('dropdown-arrow');
+            const selectedText = document.getElementById('dropdown-selected-text');
+            const hiddenInput = document.getElementById('fb-type');
+            const options = document.querySelectorAll('.dropdown-option');
+
+            trigger.addEventListener('click', () => {
+                const isExpanded = menu.classList.contains('opacity-100');
+                if (isExpanded) closeDropdown();
+                else openDropdown();
+            });
+
+            options.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    hiddenInput.value = e.currentTarget.getAttribute('data-value');
+                    selectedText.innerHTML = e.currentTarget.innerHTML;
+                    selectedText.classList.replace('text-slate-400', 'text-slate-800');
+                    closeDropdown();
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!trigger.contains(e.target) && !menu.contains(e.target)) closeDropdown();
+            });
+
+            function openDropdown() {
+                menu.classList.remove('opacity-0', 'invisible', '-translate-y-2');
+                menu.classList.add('opacity-100', 'visible', 'translate-y-0');
+                arrow.classList.add('rotate-180');
+                trigger.classList.add('border-blue-500', 'ring-2', 'ring-blue-100');
             }
 
-            if (classParam) {
-                classInput.value = classParam;
-                classInput.setAttribute("readonly", true); // Khóa không cho sửa
-                classInput.classList.add("locked");
+            function closeDropdown() {
+                menu.classList.add('opacity-0', 'invisible', '-translate-y-2');
+                menu.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                arrow.classList.remove('rotate-180');
+                trigger.classList.remove('border-blue-500', 'ring-2', 'ring-blue-100');
             }
         });
-        // ------------------------------------------------
+    </script>
 
-        window.sendFeedback = async () => {
-            const name = document.getElementById("name");
-            const classInput = document.getElementById("class");
-            const type = document.getElementById("type");
-            const content = document.getElementById("content");
+    <!-- FIREBASE & LẤY DATA TỪ URL -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-            let valid = true;
-            [name, classInput, content].forEach(i => i.classList.remove("invalid", "valid"));
+        // Khởi tạo Firebase (Sử dụng chung cấu hình với feedback.html để đồng bộ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEdkzclcyqLDQv8kRUBN4l71AggHn1jKc",
+            authDomain: "student-admin-system-f92e7.firebaseapp.com",
+            projectId: "student-admin-system-f92e7",
+            storageBucket: "student-admin-system-f92e7.firebasestorage.app",
+            messagingSenderId: "693112425401",
+            appId: "1:693112425401:web:dd2285bd4eada7a6750468"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-            if (name.value.trim().length < 2) { name.classList.add("invalid"); valid = false; } else name.classList.add("valid");
-            // Cho phép lớp chứa chữ cái nếu cần (ví dụ 12A3), hoặc giữ nguyên regex số nếu chỉ dùng số
-            if (classInput.value.trim().length < 1) { classInput.classList.add("invalid"); valid = false; } else classInput.classList.add("valid");
-            if (content.value.trim().length < 5) { content.classList.add("invalid"); valid = false; } else content.classList.add("valid");
+        // Mở khóa tường lửa bằng đăng nhập ẩn danh
+        signInAnonymously(auth).catch((error) => console.error("Lỗi xác thực Firebase:", error));
 
-            if (!valid) return;
+        // =================================================================
+        // HỆ THỐNG BẮT THÔNG TIN TỪ URL (DÀNH CHO LINK GỬI TỪ EMAIL)
+        // =================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            
+            const nameParam = params.get("name");
+            const emailParam = params.get("email");
+            const classParam = params.get("class");
+            const cardIdParam = params.get("cardid");
 
-            // Hiệu ứng loading nút
-            const btn = document.querySelector("button");
-            const originalText = btn.innerText;
-            btn.innerText = "Đang gửi...";
+            if (nameParam) document.getElementById('fb-name').value = nameParam;
+            if (emailParam) document.getElementById('fb-email').value = emailParam;
+            if (classParam) document.getElementById('fb-class').value = classParam;
+            if (cardIdParam) document.getElementById('fb-cardId').value = cardIdParam;
+        });
+        // =================================================================
+
+        // Gửi Form Feedback
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const finalName = document.getElementById('fb-name').value || "Chưa rõ tên";
+            const finalEmail = document.getElementById('fb-email').value || "Không có Email";
+            const finalClass = document.getElementById('fb-class').value || "Không rõ";
+            const finalCardId = document.getElementById('fb-cardId').value || "Chưa có mã thẻ";
+            
+            const type = document.getElementById('fb-type').value;
+            const content = document.getElementById('fb-content').value.trim();
+
+            if(!type) {
+                Swal.fire("Lưu ý", "Vui lòng nhấp vào hộp để chọn loại Feedback của bạn!", "warning");
+                return;
+            }
+            if(!content) return;
+
+            const btn = document.getElementById('btn-submit');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Đang gửi...';
             btn.disabled = true;
 
             try {
-                await addDoc(collection(db, "feedbacks"), {
-                    name: name.value,
-                    class: classInput.value,
-                    type: type.value,
-                    content: content.value,
+                await addDoc(collection(db, "feedback"), {
+                    name: finalName,
+                    email: finalEmail,
+                    class: finalClass,
+                    cardId: finalCardId,
+                    type: type,
+                    content: content,
                     createdAt: serverTimestamp()
                 });
-                showToast("Gửi feedback thành công!!!", true);
-                
-                // Chỉ xóa nội dung, giữ lại tên và lớp
-                content.value = "";
-                content.classList.remove("valid");
-            } catch (e) {
-                console.error(e);
-                showToast("Có lỗi xảy ra, vui lòng thử lại.", false);
+
+                Swal.fire({
+                    title: "Thành công!",
+                    text: "Cảm ơn bạn đã gửi phản hồi. Chúng tôi đã ghi nhận!",
+                    icon: "success",
+                    confirmButtonColor: "#1e293b"
+                });
+
+                document.getElementById('fb-content').value = '';
+                document.getElementById('fb-type').value = '';
+                document.getElementById('dropdown-selected-text').innerHTML = '-- Chọn loại feedback --';
+                document.getElementById('dropdown-selected-text').classList.replace('text-slate-800', 'text-slate-400');
+
+            } catch (error) {
+                Swal.fire("Lỗi", "Không thể gửi phản hồi lúc này. Vui lòng thử lại sau.", "error");
+                console.error("Error adding document: ", error);
             } finally {
-                btn.innerText = originalText;
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
-        };
-
-        window.showToast = (msg) => {
-            const t = document.getElementById("toast");
-            t.textContent = msg;
-            t.classList.add("show");
-            setTimeout(() => t.classList.remove("show"), 3000);
-        };
+        });
     </script>
-
-    <style>
-        * { box-sizing: border-box }
-        body { margin: 0; padding: 40px; background: transparent; font-family: 'Inter', sans-serif; display: flex; justify-content: center; }
-        /* CARD */
-        .card { width: 720px; background: white; padding: 36px; border-radius: 26px; box-shadow: 0 40px 80px rgba(0, 0, 0, .08), inset 0 1px 0 rgba(255, 255, 255, .6); }
-        h2 { margin: 0 0 6px; text-align: center; }
-        .subtitle { color: #6b7280; margin-bottom: 28px; text-align: center; }
-        /* FORM */
-        .group { margin-bottom: 18px; }
-        label { font-size: 14px; font-weight: 500; margin-bottom: 6px; display: block; }
-        input, textarea, select { width: 100%; padding: 14px 16px; border-radius: 14px; border: 2px solid #e5e7eb; font-size: 15px; outline: none; transition: .25s; background: #fafafa; }
-        textarea { resize: none; height: 140px; }
-        
-        /* LOCKED STATE (Khi tự động điền) */
-        input.locked { background-color: #f3f4f6; color: #6b7280; cursor: not-allowed; border-color: #e5e7eb; }
-        
-        /* FOCUS */
-        input:not(.locked):focus, textarea:focus, select:focus { border-color: #2563eb; background: white; }
-        /* VALIDATION */
-        input.valid, textarea.valid { border-color: #22c55e; background: #f0fdf4; }
-        input.invalid, textarea.invalid { border-color: #ef4444; background: #fef2f2; }
-        /* BUTTON */
-        button { margin-top: 10px; width: 100%; padding: 15px; font-size: 16px; font-weight: 600; border: none; border-radius: 16px; background: linear-gradient(135deg, #2563eb, #3b82f6); color: white; cursor: pointer; transition: .25s; }
-        button:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(37, 99, 235, .35); }
-        button:disabled { opacity: 0.7; cursor: wait; transform: none; }
-        /* TOAST */
-        .toast { position: fixed; bottom: 30px; right: 30px; background: #22c55e; color: white; padding: 14px 22px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, .2); opacity: 0; transform: translateY(10px); transition: .3s; }
-        .toast.show { opacity: 1; transform: none; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h2>📨 Gửi Feedback</h2>
-        <div class="subtitle">Ý kiến của bạn giúp hệ thống tốt hơn</div>
-        <div class="group">
-            <label>Tên</label>
-            <input id="name" placeholder="Nhập tên của bạn">
-        </div>
-        <div class="group">
-            <label>Lớp</label>
-            <input id="class" placeholder="Ví dụ: 12A3">
-        </div>
-        <div class="group">
-            <label>Loại feedback</label>
-            <select id="type">
-                <option>Góp ý</option>
-                <option>Báo lỗi</option>
-                <option>Đề xuất</option>
-            </select>
-        </div>
-        <div class="group">
-            <label>Nội dung</label>
-            <textarea id="content" placeholder="Nhập nội dung feedback..."></textarea>
-        </div>
-        <button onclick="sendFeedback()">Gửi feedback</button>
-    </div>
-    <div id="toast" class="toast"></div>
 </body>
 </html>
