@@ -93,6 +93,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // Cấu hình Firebase
         const firebaseConfig = {
@@ -105,6 +106,13 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // BƯỚC QUAN TRỌNG: MỞ KHÓA TƯỜNG LỬA BẰNG ĐĂNG NHẬP ẨN DANH 
+        // Đã thêm lại Auth để đảm bảo luôn vượt qua được Rule bảo mật Firebase
+        signInAnonymously(auth).catch((error) => {
+            console.error("Lỗi xác thực Firebase ban đầu:", error);
+        });
 
         // ĐIỀN THÔNG TIN TỪ LINK
         document.addEventListener('DOMContentLoaded', () => {
@@ -131,7 +139,11 @@
             btn.disabled = true;
 
             try {
-                // Đã xóa phần Auth, đẩy thẳng lên Firestore dựa trên quyền allow create: if true
+                // Kiểm tra và ép đăng nhập ẩn danh nếu mạng chậm dẫn tới chưa lấy kịp token
+                if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
                 await addDoc(collection(db, "feedback"), {
                     name: document.getElementById('fb-name').value || "Chưa rõ tên",
                     email: document.getElementById('fb-email').value || "Không có Email",
