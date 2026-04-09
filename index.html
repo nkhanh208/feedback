@@ -89,19 +89,20 @@
         });
     </script>
 
-    <!-- FIREBASE SCRIPT (ĐÃ XÓA AUTH DO KHÔNG CÒN CẦN THIẾT) -->
+    <!-- FIREBASE SCRIPT (CẤU HÌNH CỦA BẠN - THUVIEN-44050) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Cấu hình Firebase
+        // Đã sử dụng Firebase dự án CỦA BẠN
         const firebaseConfig = {
-            apiKey: "AIzaSyCEdkzclcyqLDQv8kRUBN4l71AggHn1jKc",
-            authDomain: "student-admin-system-f92e7.firebaseapp.com",
-            projectId: "student-admin-system-f92e7",
-            storageBucket: "student-admin-system-f92e7.firebasestorage.app",
-            messagingSenderId: "693112425401",
-            appId: "1:693112425401:web:dd2285bd4eada7a6750468"
+            apiKey: "AIzaSyCgpPUYV5lqZ_5zUua8Q_ThNEIkPsEg2do",
+            authDomain: "thuvien-44050.firebaseapp.com",
+            projectId: "thuvien-44050",
+            storageBucket: "thuvien-44050.firebasestorage.app",
+            messagingSenderId: "926801895944",
+            appId: "1:926801895944:web:72a42302cfc85a998da7bd",
+            measurementId: "G-TMJB630SHL"
         };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -131,7 +132,7 @@
             btn.disabled = true;
 
             try {
-                // Đẩy thẳng dữ liệu lên Firestore (Đã được phép nhờ allow create: if true;)
+                // Ghi dữ liệu lên collection "feedback" (Firebase tự động tạo bảng này)
                 await addDoc(collection(db, "feedback"), {
                     name: document.getElementById('fb-name').value || "Chưa rõ tên",
                     email: document.getElementById('fb-email').value || "Không có Email",
@@ -150,8 +151,7 @@
                 document.getElementById('dropdown-selected-text').classList.replace('text-slate-800', 'text-slate-400');
 
             } catch (error) {
-                Swal.fire("Lỗi Firebase", "Gửi thất bại. Lý do: " + error.message, "error");
-                console.error("Firebase Error:", error);
+                Swal.fire("Lỗi", "Gửi thất bại. Lý do: " + error.message, "error");
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
